@@ -1,11 +1,200 @@
 # AI Agent - LangGraph ReAct Agent API
 
-A production-ready AI agent built with LangGraph and LangChain that provides intelligent query processing through a FastAPI REST interface. The agent leverages multiple tools including web search, mathematical calculations, RAG (Retrieval-Augmented Generation), and custom API integrations to provide comprehensive and accurate responses.
+This is a production-ready AI agent built with **LangGraph** and **LangChain**, exposed via a FastAPI REST API. It uses smart decision-making to choose the right tools—like web search, math solving, document retrieval (RAG), and custom API calls—to answer user queries accurately. It’s modular, secure, and easy to extend for real-world applications.
 
-## Features
+## What It Can Do
 
 - **🤖 ReAct Agent Architecture**: Implements the ReAct (Reasoning and Acting) pattern using LangGraph for improved decision-making
-- **🔍 Web Search Integration**: Real-time web searches powered by SerpAPI
+- **🔍 Web Search Integration**: - Finds real-time info using SerpAPI
+- 🧮 Math Help: Solves math problems with a built-in calculator
+- 📚 Document Search: Finds answers from saved documents using ChromaDB
+- 🔌 Connect to Other APIs: Easily add your own API tools
+- 🔐 Secure Access: Protects endpoints with API keys
+- ⚡ Rate Limits: Prevents too many requests at once
+- 🔁 Auto Retry: Tries again if something fails
+- 📈 Logging: Shows useful messages for debugging
+- 💾 Saves Info: Stores documents for quick searching later
+
+🧱 How It Works
+Client → FastAPI Server → LangGraph Agent → Tools (Search, Math, RAG, Custom API)
+
+
+
+🛠 What You Need
+- Python 3.8 or newer
+- OpenAI API key
+- SerpAPI key
+- (Optional) Your own API endpoint
+
+📦 Setup Steps
+- Download the code
+git clone https://github.com/IJ-s-lab/AI_agent.git
+cd AI_agent
+
+
+- Create a virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+
+- Install the required packages
+pip install -r requirements.txt
+
+
+
+🔧 Configuration
+Make a .env file in the project folder:
+OPENAI_API_KEY=your_openai_api_key
+SERPAPI_API_KEY=your_serpapi_key
+OPENAI_MODEL=gpt-4o-mini
+AGENT_API_KEY=change-me
+CHROMA_DB_DIR=./chroma_db
+REQUESTS_PER_MINUTE=60
+CUSTOM_API_URL=https://your-custom-api.com/endpoint
+
+
+
+🚀 Start the Server
+python main.py
+
+
+Visit the docs at: http://localhost:8080/docs
+
+📡 API Endpoints
+🔹 POST /v1/agent/run
+Ask the agent a question.
+Headers:
+X-API-Key: your_agent_api_key
+Content-Type: application/json
+
+
+Example Request:
+{
+  "query": "What is the square root of 144?",
+  "max_retries": 2
+}
+
+
+Example Response:
+{
+  "answer": "The square root of 144 is 12."
+}
+
+
+
+🔹 GET /health
+Check if the server is running.
+{
+  "status": "ok",
+  "model": "gpt-4o-mini"
+}
+
+
+
+🧰 Tools Available
+|  |  | 
+|  |  | 
+|  |  | 
+|  |  | 
+|  |  | 
+
+
+
+🧪 Developer Info
+Project Files
+AI_agent/
+├── main.py
+├── requirements.txt
+├── .env
+├── .gitignore
+├── LICENSE
+├── chroma_db/
+└── README.md
+
+
+Add Your Own Documents
+In main.py, update this part:
+doc_texts = [
+    "Your first document...",
+    "Your second document..."
+]
+vectorstore = get_or_create_vectorstore(doc_texts=doc_texts)
+
+
+Add a New Tool
+- Write your tool:
+def my_tool(input_text: str) -> str:
+    try:
+        result = do_something(input_text)
+        return str(result)
+    except Exception as e:
+        return f"[error] {str(e)}"
+
+
+- Add it to the list:
+TOOLS = [web_search_tool, calculator_tool, rag_search_tool, custom_api_tool, my_tool]
+
+
+
+🚢 Deploying
+Run with Gunicorn (for production)
+gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8080
+
+
+Run with Docker
+Dockerfile:
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY main.py .
+EXPOSE 8080
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+
+
+Build and Run:
+docker build -t ai-agent .
+docker run -p 8080:8080 --env-file .env ai-agent
+
+
+
+🔐 Security Tips
+- Change the default API key
+- Use HTTPS with a reverse proxy like Nginx
+- Add better authentication (OAuth2 or JWT)
+- Set rate limits to avoid spam
+- Store secrets safely (e.g., AWS Secrets Manager)
+- Validate user input
+- Monitor logs
+
+🧯 Error Handling
+- Tries again if something fails
+- Shows helpful error messages
+- Limits requests to avoid overload
+- Blocks bad API keys
+
+📋 Logging
+Logs look like this:
+2025-10-21 11:12:00 INFO Server started
+2025-10-21 11:12:05 ERROR Something went wrong
+
+
+
+📄 License
+This project uses the GNU GPL v3.0 license. See the LICENSE file.
+
+🤝 Contribute
+Want to help? Submit a pull request or open an issue on GitHub.
+
+🙏 Thanks To
+- LangChain
+- LangGraph
+- OpenAI
+- SerpAPI
+- ChromaDB
+
+Let me know if you'd like this saved as a Markdown file or need help publishing it!
+
 - **🧮 Mathematical Calculations**: Built-in calculator for complex mathematical expressions
 - **📚 RAG Capability**: Vector-based document retrieval using Chroma DB for knowledge base queries
 - **🔌 Custom API Integration**: Extensible tool for integrating external APIs
@@ -199,7 +388,7 @@ The agent has access to the following tools:
 ### 1. Web Search Tool
 - **Function**: `web_search_tool(query: str)`
 - **Purpose**: Performs real-time web searches using SerpAPI
-- **Use Case**: Fetching current information, news, or any web-based data
+- **Use Case**: Finds info online using SerpAPI
 
 ### 2. Calculator Tool
 - **Function**: `calculator_tool(expr: str)`
@@ -312,7 +501,7 @@ docker run -p 8080:8080 --env-file .env ai-agent
 - **Change the default API key**: Update `AGENT_API_KEY` in `.env`
 - **Use HTTPS**: Deploy behind a reverse proxy (nginx, Caddy) with SSL/TLS
 - **Implement proper authentication**: Consider OAuth2 or JWT for production
-- **Rate limiting**: Adjust `REQUESTS_PER_MINUTE` based on your needs
+- **Rate limiting**: Adjust `REQUESTS_PER_MINUTE` based on your needs to avoid spam
 - **Secrets management**: Use proper secrets management (AWS Secrets Manager, HashiCorp Vault, etc.)
 - **Input validation**: The agent includes basic input validation; enhance as needed
 - **Monitor logs**: Set up proper log aggregation and monitoring
